@@ -157,57 +157,9 @@ void* arthook_entrypoint_end(jclass mycls){
 JNIEnv* get_global_jnienv(){
     return th_env;
 }
-void set_hookdemo_init(void* func){
+void set_hookdemo_init(void* func) {
     hookdemo_init = func;
 }
-
-    /*
-    jint checkstack = 0;
-    void *checkcalledmethod = (void *) 0;
-    JNIEnv *myenv = get_global_jnienv();
-    if(myenv == NULL){
-        LOGG("ERROR getting JNIEnv* \n");
-        goto error;
-    }
-    checkstack = printStackTraceFromJava(myenv);
-
-    // check if an hooked method is the target of the reflection call
-    checkcalledmethod = hh_check_javareflection_call(myenv, javaMethod, javaReceiver);
-    // checks:
-    // 1. the method called with reflection is hooked?
-    // 2. the call is from our patch method?
-    //
-    //checkcalledmethod = 0;
-    // called method is not an hooked method
-    if(!checkcalledmethod){
-        arthooklog("called method is not an hooked method, return to normal flow \n");
-        hook_precall(&invokeh);
-        res = orig_invoke_method(soa,javaMethod,javaReceiver,javaArgs);
-        //hook_postcall(&invokeh);
-        arthooklog("end originalcall\n");
-    }
-    else{
-        if(checkstack){
-            // trapped call is from a "patch method"
-            // so we have to direct call the original method
-            arthooklog("trapped call is from trusted patch code, calling original method \n");
-            return callOriginalReflectedMethod(myenv, javaReceiver, (arthook_t*) checkcalledmethod, javaArgs);
-        }
-        else{
-            // call the "patch method"
-            //
-            arthooklog("ok hooked method founded, calling patch method \n");
-            return call_patch_method(myenv, (arthook_t*) checkcalledmethod, javaReceiver, javaArgs);
-        }
-    }
-    return res;
-
-    error:
-    hook_precall(&invokeh);
-    return 0;
-}
-     */
-
 //NOT USED, IS BROKEN!!!
 /*
 int my_epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout)

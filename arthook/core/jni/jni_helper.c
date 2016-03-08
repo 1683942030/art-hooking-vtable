@@ -58,7 +58,6 @@ jobject getSystemClassLoader(JNIEnv* env)
     jobject systemCL = (*env)->CallStaticObjectMethod(env, classLoader, getSystemCL);
     arthooklog("systemclassloader = %p \n ", systemCL);
     return systemCL;
-
 }
 
 jclass loadClassFromClassLoader(JNIEnv* env, jobject classLoader, char* targetName)

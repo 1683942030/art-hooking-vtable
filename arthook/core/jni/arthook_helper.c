@@ -10,23 +10,17 @@
 static int set_hook(JNIEnv *env, arthook_t *h)
 {
     unsigned int* res;
-    arthooklog("set_hook\n");
-
-
     res = searchInMemoryVtable( (unsigned int) h->original_meth_ID, (unsigned int) h->original_meth_ID, isLollipop(env), false);
-
     if(res == 0) {
         LOGG("search returned 0\n");
         return 0;
     }
     // change the pointer in the vtable
     set_pointer(res, (unsigned int ) h->hook_meth_ID);
-/*    
-       res = searchInMemoryVmeths( (unsigned int) h->original_meth_ID, (unsigned int) h->original_meth_ID, isLollipop(env));
-       if(res == 0) return 0;
-       LOGI("trovato SECONDO GIRO pointer at 0x%x \n",  res);
-       set_pointer(res, (unsigned int ) h->hook_meth_ID); //TODO: set_vtable_pointer
-*/    
+    //res = searchInMemoryVmeths( (unsigned int) h->original_meth_ID, (unsigned int) h->original_meth_ID, isLollipop(env));
+    if(res == 0) return 0;
+    LOGI("VMETHODS pointer at 0x%x \n",  res);
+    set_pointer(res, (unsigned int ) h->hook_meth_ID); //TODO: set_vtable_pointer
     return 1;
 }
 
@@ -46,7 +40,7 @@ static int set_hook(JNIEnv *env, arthook_t *h)
 arthook_t* create_hook(JNIEnv *env, char *clsname, const char* mname,const  char* msig, jclass hook_cls, jmethodID hookm)
 {
     arthooklog("------------------------------------------------------------------------------\n\n");
-    arthooklog("%s mname: %s , msig: %s \n ", __PRETTY_FUNCTION__, mname, msig);
+    arthooklog("%s clsname: %s , mname: %s , msig: %s \n ", __PRETTY_FUNCTION__,clsname, mname, msig);
   
     arthook_t *tmp = NULL;
     jclass target = NULL;
@@ -67,10 +61,10 @@ arthook_t* create_hook(JNIEnv *env, char *clsname, const char* mname,const  char
     strcat(tmp->key,mname);
     strcat(tmp->key,msig);
 
-    // find the target class using JNI
+    // finding target class using JNI
     target = (*env)->FindClass(env, clsname);
     arthooklog("%s, target class addr: 0x%X \n", __PRETTY_FUNCTION__, target);
-    // make it a global ref for future access
+    if(!target) return NULL;
     gTarget = (jclass) (*env)->NewGlobalRef(env, target);
     // get mid of the target method to hook
     target_meth_ID = (*env)->GetMethodID(env, target, mname, msig);
@@ -341,21 +335,13 @@ static unsigned int* searchInMemoryVtable_all(unsigned int start, int target) {
     unsigned int* mid_handler;
     int* mid_index;
     int midvtable;
-
     //getting declaring_class_
     pClazz = (start + CLAZZ_OFF_);
-    arthooklog("pclazz vale:  0x%X \n", *pClazz);
     mid_index = (start + LOLLIPOP_MID_INDEX_OFF );
-    arthooklog("mid_index vale: 0x%02x \n", *mid_index);
     arthooklog("ora calcolo %08x  + %d * 4 \n", *pClazz, *mid_index);
     midvtable = ((int)(*pClazz) + (*mid_index * 4));
     arthooklog("midvtable vale: 0x%X \n", midvtable);
     mid_handler = midvtable + 0x170;
-    arthooklog("handler2: %X = %08X \n", mid_handler, *mid_handler);
-
-    //arthooklog("%s clazz: %p, * = 0x%08x , midindex = %08x [] handler=%p, * = 0x%08x \n", __PRETTY_FUNCTION__,
-    //           pClazz , *pClazz, *mid_index,
-    //           mid_handler, *mid_handler);
     return mid_handler;
 }
 /*
@@ -374,47 +360,24 @@ static unsigned int* searchInMemoryVtable(unsigned int start, int target, int lo
     }
 }
 
-// TODO: to be completed
-/*
-static unsigned int* searchInMemoryVmeths(unsigned int start, int gadget, int lollipop){
+
+static unsigned int* searchInMemoryVmeths(unsigned int start, int target, int lollipop){
     //LOGI("start VMETHODS: 0x%08x, gadget 0x%08x, lollipop = %d \n", start, gadget, lollipop);
-    unsigned int i = 0;
     unsigned int *pClazz;
-    unsigned int* pAccess_flags;
-    unsigned int *vtable;
     unsigned int *vmethods;
+    unsigned int* vmethods_len;
+
     // > 4.4.4 offsets
     if(lollipop){
-        pClazz = (unsigned int*) (start + LOLLIPOP_CLAZZ_OFF);
-        vtable =  (unsigned int*) ((*pClazz) +  LOLLIPOP_VMETHODS_OFF);
+        pClazz = (unsigned int*) (start + CLAZZ_OFF_);
         vmethods =  (unsigned int*) ((*pClazz) +  LOLLIPOP_VMETHODS_OFF);
-        //LOGI("LOLLIPOP clazz: 0x%08x, * = 0x%08x -> vtable=0x%08x, * = 0x%08x, vmethods = 0x%08x, * = 0x%08x \n", pClazz , *pClazz, vtable, *vtable, vmethods, *vmethods );
+        vmethods_len = (unsigned int*) ((*vmethods) + VMETHODS_LEN_OFF_);
     }
     //kitkat 4.4.4 with art offsets
     else{
-        pClazz = (unsigned int*) (start + CLAZZ_OFF);
-        pAccess_flags = (unsigned int*) (start + ACCESS_FLAG_OFF);
-        vtable =  (unsigned int*) ((*pClazz) + VTABLE_OFF);
-        vmethods = (unsigned int*) ((*pClazz) + ITABLE_OFF);
-        if(! (*vmethods) ) return 0;
-    }
-    breakMe();
-    unsigned char *g2 = (unsigned char*) &gadget; 
-    unsigned char *p = (unsigned char*)  *vmethods;
-    arthooklog("INIZIO RICERCA\n");
-    //searching the method reference inside the class's vtable
-    while(1){
-        //LOGI("check p 0x%08x and gadget 0x%08x \n",p, gadget);
-        if(! memcmp(p, g2, 4 )){
-            unsigned int* found_at = (unsigned int*) (*vmethods + i) ;
-            //LOGI("target: 0x%08x at 0x%08x. vmeths = %x, i = %d \n", gadget, found_at, *vmethods, i);
-            //changed = 1;
 
-            return found_at;
-        }
-        p += 4; i += 4;
     }
-    return 0;
+    arthooklog("pclazz: %p = %x\n", pClazz, *pClazz);
+    arthooklog("vmethods len: %zd \n", *vmethods_len);
+    return searchInMemory(vmethods, target, vmethods_len);
 }
-
-*/

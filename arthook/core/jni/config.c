@@ -55,7 +55,8 @@ static void start_parsing(json_value* value, config_t* c){
     arthooklog("debug vale: %s\n", root->u.object.values[0].name);
     int debug = root->u.object.values[0].value->u.integer;
     arthooklog("DEBUG: %d\n", debug);
-    c->debug = debug;
+    //c->debug = debug;
+    c->debug = 0;
 
     arthooklog("dexfile vale: %s\n", root->u.object.values[1].name);
     char* dexfile = root->u.object.values[1].value->u.string.ptr;
