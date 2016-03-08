@@ -24,10 +24,6 @@ LOCAL_SRC_FILES := artstuff.c \
                    arthook_bridge.c \
                    epoll_arm.c.arm \
                    json_parser/json.c \
-                   art/art_method_replace.cpp \
-					art/art_method_replace_5_0.cpp \
-					art/art_method_replace_5_1.cpp \
-					art/art_method_replace_6_0.cpp \
 					config.c \
 					main.c
 LOCAL_C_INCLUDES := ../../../adbi/instruments/base/
