@@ -15,14 +15,24 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE    := libarthook
-LOCAL_SRC_FILES := artstuff.c   
-LOCAL_SRC_FILES += utils.c arthook_helper.c arthook_manager.c
-LOCAL_SRC_FILES += jni_helper.c  arthook_bridge.c epoll_arm.c.arm json_parser/json.c
-LOCAL_SRC_FILES += config.c main.c
+LOCAL_MODULE    := libartdroid
+LOCAL_SRC_FILES := artstuff.c \
+                   utils.c \
+                   arthook_helper.c \
+                   arthook_manager.c \
+                   jni_helper.c \
+                   arthook_bridge.c \
+                   epoll_arm.c.arm \
+                   json_parser/json.c \
+                   art/art_method_replace.cpp \
+					art/art_method_replace_5_0.cpp \
+					art/art_method_replace_5_1.cpp \
+					art/art_method_replace_6_0.cpp \
+					config.c \
+					main.c
 LOCAL_C_INCLUDES := ../../../adbi/instruments/base/
 #LOCAL_INCLUDE   := ../../adbi/instruments/base/hook.h
-LOCAL_CFLAGS := -g -std=gnu99
+LOCAL_CFLAGS := -std=gnu++11 -fpermissive -DDEBUG -O0
 LOCAL_ARM_MODE := thumb
 LOCAL_SHARED_LIBRARIES := dl
 LOCAL_LDLIBS := -llog 
