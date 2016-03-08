@@ -8,7 +8,6 @@
 #include "artstuff.h"
 #include "base.h"
 
-extern pthread_mutex_t lock;
 extern void my_log(char *msg);
 extern void artlogmsgtofile(char* msg);
 
