@@ -12,7 +12,6 @@ void my_init(void)
 {
 
     bool zygote = 0;
-    if (pthread_mutex_init(&lock,NULL) != 0) return;
     // adbi and arthook log functions
     set_logfunction(my_log);
     set_arthooklogfunction(artlogmsgtofile);
