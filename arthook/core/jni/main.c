@@ -140,12 +140,9 @@ void* my_invoke_method(void* soa, jobject javaMethod, void* javaReceiver, jobjec
         }
         done = 1;
     }
-    arthooklog("called method is not an hooked method, return to normal flow \n");
     hook_precall(&invokeh);
     res = orig_invoke_method(soa, javaMethod, javaReceiver, javaArgs);
     //hook_postcall(&invokeh);
-    arthooklog("end originalcall\n");
-
     return res;
 }
 void* arthook_entrypoint_end(jclass mycls){
